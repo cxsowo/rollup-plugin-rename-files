@@ -1,3 +1,42 @@
+# rollup-plugin-rename-files
+
+个人遇到的问题：组件库用 `preserveModules` 打包带有 `less` 文件的会变编译成 `.less.js` ，实际使用项目以及合理性考虑想改成 `.css.js` 文件后缀，找了一些包都没能解决这个问题————
+`rollup-plugin-rename` 老报错,
+`rollup-plugin-rename-node-modules` 只改 `node_modules` 下的
+`rollup-plugin-rename-extensions` 也改不了猜测是只匹配 `extensions`
+
+所以决定稍微改下 `rollup-plugin-rename-node-modules` 来解决这个问题
+
+## Install
+
+Using npm:
+
+```bash
+npm install rollup-plugin-rename-files --save-dev
+```
+
+## Usage
+
+```js
+import rename from "rollup-plugin-rename-files";
+
+export default {
+  input: "src/index.js",
+  output: {
+    dir: "output",
+    format: "cjs",
+  },
+  plugins: [
+    rename({
+      includes: "",
+      moduleName: (filename) => filename.replace(/\.less\.js/g, ".css.js"), // string | ((fileName: string) => string) = "external",
+    }),
+  ],
+};
+```
+
+# 下面是原来项目的 readme
+
 # rollup-plugin-rename-node-modules
 
 🍣 A Rollup plugin to rename the `node_modules` created when bundling some external libries while using `preserveModules`
@@ -44,7 +83,7 @@ It takes a string and will rename files and mentions of `node_module` to the pro
 It has an optional second parameter `sourceMap` which defaults to `true` and can disable source map generation:
 
 ```js
-plugins: [renameNodeModules("ext", false)]
+plugins: [renameNodeModules("ext", false)];
 ```
 
 ### Credit

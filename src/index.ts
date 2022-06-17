@@ -47,6 +47,7 @@ function getImportSource(node: any): Node | false {
 const importNodeTypes = [NodeType.ImportDeclaration, NodeType.CallExpression];
 
 const plugin = (
+  includes: string = "node_modules",
   moduleName: string | ((fileName: string) => string) = "external",
   sourceMaps = true
 ): Plugin => {
@@ -59,13 +60,13 @@ const plugin = (
     generateBundle(_, bundle) {
       const changedFiles: string[] = [];
       Object.entries(bundle).forEach(([fileName, chunkInfo]) => {
-        if (fileName.includes("node_modules")) {
+        if (fileName.includes(includes)) {
           const newFileName = replace(fileName);
           chunkInfo.fileName = newFileName;
           changedFiles.push(fileName);
         }
         if ("code" in chunkInfo) {
-          if (chunkInfo.imports.some((i) => i.includes("node_modules"))) {
+          if (chunkInfo.imports.some((i) => i.includes(includes))) {
             const magicString = new MagicString(chunkInfo.code);
             const ast = this.parse(chunkInfo.code, {
               ecmaVersion: "latest",
@@ -78,7 +79,7 @@ const plugin = (
                   const req: any =
                     getRequireSource(node) || getImportSource(node);
 
-                  if (req && req.value.includes("node_modules")) {
+                  if (req && req.value.includes(includes)) {
                     const { start, end } = req;
                     // compute a new path relative to the bundle root
                     const bundlePath = replace(
